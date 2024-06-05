@@ -50,7 +50,7 @@ ansible all -m reboot
 Install the Ansible and Run the Playbook
 
 ```
-ansible-playbook 
+ansible-playbook -i inventory ansible_java_install.yml
 ```
 
 ### Playbook 2: Installation of Apache using Ansible playbook
@@ -58,7 +58,7 @@ ansible-playbook
 Install the Ansible and Run the Playbook
 
 ```
-ansible-playbook 
+ansible-playbook -i inventory ansible_apache_install.yml
 ```
 
 ### Playbook 3: Installation of Tomcat using Ansible playbook with version
@@ -66,7 +66,7 @@ ansible-playbook
 Install the Ansible and Run the Playbook
 
 ```
-ansible-playbook 
+ansible-playbook -i inventory ansible_nginx_install.yml
 ```
 
 ### Playbook 4: Installation of Nginx using Ansible playbook
@@ -74,5 +74,5 @@ ansible-playbook
 Install the Ansible and Run the Playbook
 
 ```
-ansible-playbook 
+ansible-playbook -i inventory ansible_nginx_install.yml
 ```
