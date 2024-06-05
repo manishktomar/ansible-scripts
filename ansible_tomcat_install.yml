@@ -1,0 +1,67 @@
+---
+- name: Install Apache Tomcat
+  hosts: tomcat_servers
+  become: true  # Run tasks with sudo/root privileges
+
+  vars:
+    tomcat_version: 9
+    tomcat_download_url: "https://archive.apache.org/dist/tomcat/tomcat-{{ tomcat_version }}/v{{ tomcat_version }}.0.{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.0.{{ tomcat_version }}.tar.gz"
+    tomcat_install_dir: /opt/tomcat
+    tomcat_user: tomcat
+    tomcat_group: tomcat
+    tomcat_service: tomcat
+    tomcat_port: 8080
+    tomcat_manager_username: admin
+    tomcat_manager_password: mypassword  # Change this to your desired password
+
+  tasks:
+    - name: Install Java Development Kit (JDK)
+      apt:
+        name: default-jdk
+        state: present
+
+    - name: Create Tomcat user and group
+      user:
+        name: "{{ tomcat_user }}"
+        group: "{{ tomcat_group }}"
+        system: yes                               #  it indicates that the user being created is a system user.
+        shell: /bin/false
+
+    - name: Download Tomcat binary
+      get_url:
+        url: "{{ tomcat_download_url }}"
+        dest: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
+
+    - name: Extract Tomcat archive
+      unarchive:
+        src: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
+        dest: "{{ tomcat_install_dir }}"
+        remote_src: yes                                  # it means that the file or archive specified in the src parameter of the task is located on the control node, and Ansible should transfer it to the managed nodes before executing the task.
+      notify: Restart Tomcat
+
+    - name: Set ownership and permissions for Tomcat directory
+      file:
+        path: "{{ tomcat_install_dir }}"
+        owner: "{{ tomcat_user }}"
+        group: "{{ tomcat_group }}"
+        mode: "0755"
+        recurse: yes                                      #  it means that the task will apply to all files and subdirectories within the specified directory.
+
+    - name: Modify Tomcat server port in configuration
+      lineinfile:
+        path: "{{ tomcat_install_dir }}/conf/server.xml"
+        regexp: '<Connector port="8080"'                  # is used to specify a regular expression pattern that is used to search for a particular pattern within a file.
+        line: '<Connector port="{{ tomcat_port }}"'
+
+    - name: Change manager username and password
+      blockinfile:
+        path: "{{ tomcat_install_dir }}/conf/tomcat-users.xml"
+        block: |
+          <role rolename="manager-gui"/>
+          <user username="{{ tomcat_manager_username }}" password="{{ tomcat_manager_password }}" roles="manager-gui"/>
+
+  handlers:
+    - name: Restart Tomcat
+      service:
+        name: "{{ tomcat_service }}"
+        state: restarted

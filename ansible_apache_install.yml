@@ -1,0 +1,69 @@
+---
+- name: Install and configure Apache
+  hosts: localhost
+  become: yes
+  vars_prompt:
+    - name: create_host
+      prompt: "Enter the name of Virtual Host"
+      private: no
+    - name: create_domain
+      prompt: "Enter the Domain name for Virtual Host"
+      private: no
+  tasks:
+    - name: Update package list
+      apt:
+        update_cache: yes
+
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Start & Enable Apache
+      systemd:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Create Apache virtual host
+      ansible.builtin.shell: |
+        cat << EOF > /etc/apache2/sites-available/{{ create_host }}.conf
+        <VirtualHost *:80>
+          ServerName {{ create_domain }}
+          ServerAlias www.{{ create_domain }}
+          DocumentRoot "/var/www/html/{{ create_host }}"
+          ErrorLog "/var/log/apache2/{{ create_host }}-error_log"
+          CustomLog "/var/log/apache2/{{ create_host }}-access_log" combined
+        </VirtualHost>
+        EOF
+      notify:
+        - Enable and reload Apache
+        
+    - name: Create directory for virtual host
+      ansible.builtin.file:
+        path: "/var/www/html/{{ create_host }}"
+        state: directory
+        owner: www-data
+        group: www-data
+    
+    - name: Create HTML file for virtual host
+      ansible.builtin.file:
+        path: "/var/www/html/{{ create_host }}/index.html"
+        state: touch
+        owner: www-data
+        group: www-data
+      notify:
+        - Enable and reload Apache
+
+    - name: Reload Apache
+      systemd:
+        name: apache2
+        state: reloaded
+      notify:
+        - Enable and reload Apache
+
+  handlers:
+    - name: Enable and reload Apache
+      ansible.builtin.shell: |
+        a2ensite {{ create_host }}.conf
+        systemctl reload apache2

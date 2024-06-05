@@ -1,0 +1,38 @@
+---
+- name: Install Java on Ubuntu
+  hosts: localhost
+  become: yes
+  vars_prompt:
+    - name: java_version
+      prompt: "Enter Java version (8, 11, or 17):"
+      private: no
+
+  tasks:
+    - name: Validate Java version input
+      fail:
+        msg: "Invalid Java version. Please enter 8, 11, or 17."
+      when: java_version not in ['8', '11', '17']
+
+    - name: Install software-properties-common package
+      apt:
+        name: software-properties-common
+        state: present
+
+    - name: Add OpenJDK PPA repository
+      apt_repository:
+        repo: ppa:openjdk-r/ppa
+        state: present
+
+    - name: Install OpenJDK {{ java_version }} package
+      apt:
+        name: "openjdk-{{ java_version }}-jdk"
+        state: present
+
+    - name: Verify Java installation
+      command: java --version
+      register: java_version_output
+      ignore_errors: yes
+
+    - name: Display Java version
+      debug:
+        msg: "{{ java_version_output.stdout }}"
