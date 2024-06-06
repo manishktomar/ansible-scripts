@@ -53,7 +53,15 @@ Install the Ansible and Run the Playbook
 ansible-playbook -i inventory ansible_java_install.yml
 ```
 
-### Playbook 2: Installation of Apache using Ansible playbook
+### Playbook 2: Installation of Java using Ansible playbook with version
+
+Install the Ansible and Run the Playbook
+
+```
+ansible-playbook -i inventory ansible_java_install_with_version_promt.yml
+```
+
+### Playbook 3: Installation of Apache using Ansible playbook
 
 Install the Ansible and Run the Playbook
 
@@ -61,7 +69,7 @@ Install the Ansible and Run the Playbook
 ansible-playbook -i inventory ansible_apache_install.yml
 ```
 
-### Playbook 3: Installation of Tomcat using Ansible playbook with version
+### Playbook 4: Installation of Tomcat using Ansible playbook with version
 
 Install the Ansible and Run the Playbook
 
@@ -69,7 +77,7 @@ Install the Ansible and Run the Playbook
 ansible-playbook -i inventory ansible_nginx_install.yml
 ```
 
-### Playbook 4: Installation of Nginx using Ansible playbook
+### Playbook 5: Installation of Nginx using Ansible playbook
 
 Install the Ansible and Run the Playbook
 
